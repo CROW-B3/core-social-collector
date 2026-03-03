@@ -1,0 +1,25 @@
+# Build stage - compile the worker
+FROM oven/bun:1 AS builder
+
+WORKDIR /app
+
+COPY package.json bun.lock ./
+RUN bun install --frozen-lockfile
+
+COPY . ./
+
+# Compile worker using wrangler
+RUN bunx wrangler deploy --dry-run --outdir .wrangler/dist
+
+# Runtime stage - run with workerd
+FROM jacoblincool/workerd
+
+WORKDIR /worker
+
+# Copy compiled worker and configuration
+COPY --from=builder /app/.wrangler/dist/index.js ./index.js
+COPY worker.capnp ./worker.capnp
+
+EXPOSE 8080
+
+# workerd runtime will use worker.capnp configuration
