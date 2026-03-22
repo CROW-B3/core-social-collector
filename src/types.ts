@@ -1,7 +1,7 @@
 export interface Environment {
   DB: D1Database;
   ENVIRONMENT: 'local' | 'dev' | 'prod';
-  INTERACTION_QUEUE: Queue<InteractionMessage>;
+  SOCIAL_PROCESSING_QUEUE: Queue<InteractionMessage>;
   AI: Ai;
   AI_GATEWAY_ID: string;
   TAVILY_API_KEY: string;

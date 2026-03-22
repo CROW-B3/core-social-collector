@@ -32,8 +32,8 @@
   "queues": {
     "producers": [
       {
-        "binding": "INTERACTION_QUEUE",
-        "queue": "crow-interaction-queue",
+        "binding": "SOCIAL_PROCESSING_QUEUE",
+        "queue": "crow-social-processing-queue",
       },
     ],
   },
@@ -66,8 +66,8 @@
       "queues": {
         "producers": [
           {
-            "binding": "INTERACTION_QUEUE",
-            "queue": "crow-interaction-queue-dev",
+            "binding": "SOCIAL_PROCESSING_QUEUE",
+            "queue": "crow-social-processing-queue-dev",
           },
         ],
       },
@@ -96,8 +96,8 @@
       "queues": {
         "producers": [
           {
-            "binding": "INTERACTION_QUEUE",
-            "queue": "crow-interaction-queue-local",
+            "binding": "SOCIAL_PROCESSING_QUEUE",
+            "queue": "crow-social-processing-queue-local",
           },
         ],
       },
