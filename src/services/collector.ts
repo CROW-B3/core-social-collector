@@ -15,16 +15,28 @@ export async function runCollection(env: Environment): Promise<void> {
   const db = createDatabaseClient(env.DB);
 
   // Fetch all enabled source configs
-  const sourceConfigs = await db
-    .select()
-    .from(socialSourceConfigs)
-    .where(eq(socialSourceConfigs.enabled, 1));
+  let sourceConfigs: Array<typeof socialSourceConfigs.$inferSelect>;
+  let searchConfigs: Array<typeof socialSearchConfigs.$inferSelect>;
 
-  // Fetch all enabled search configs
-  const searchConfigs = await db
-    .select()
-    .from(socialSearchConfigs)
-    .where(eq(socialSearchConfigs.enabled, 1));
+  try {
+    sourceConfigs = await db
+      .select()
+      .from(socialSourceConfigs)
+      .where(eq(socialSourceConfigs.enabled, 1));
+  } catch (error) {
+    console.error('[collector] Failed to query social_source_configs (table may not exist - run migrations):', error);
+    sourceConfigs = [];
+  }
+
+  try {
+    searchConfigs = await db
+      .select()
+      .from(socialSearchConfigs)
+      .where(eq(socialSearchConfigs.enabled, 1));
+  } catch (error) {
+    console.error('[collector] Failed to query social_search_configs (table may not exist - run migrations):', error);
+    searchConfigs = [];
+  }
 
   // Group by org_id
   const orgIds = new Set<string>();

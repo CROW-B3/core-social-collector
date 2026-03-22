@@ -58,8 +58,7 @@
         {
           "binding": "DB",
           "database_name": "crow-social-collector-db-dev",
-          // TODO: Replace with actual database_id after running: wrangler d1 create crow-social-collector-db-dev
-          "database_id": "PLACEHOLDER_DEV_DB_ID",
+          "database_id": "9e409755-1ef9-4773-8eb4-524f0ecc6aea",
           "migrations_dir": "drizzle/migrations",
           "remote": true,
         },
