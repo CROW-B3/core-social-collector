@@ -50,13 +50,18 @@ export async function dispatchToQueue(
     };
 
     try {
-      await env.INTERACTION_QUEUE.send(message);
+      await env.SOCIAL_PROCESSING_QUEUE.send(message);
       dispatched += batch.length;
     } catch (error) {
-      console.error(`[queue-dispatcher] Failed to send batch ${Math.floor(i / batchSize)} for org ${orgId}:`, error);
+      console.error(
+        `[queue-dispatcher] Failed to send batch ${Math.floor(i / batchSize)} for org ${orgId}:`,
+        error
+      );
     }
   }
 
-  console.warn(`[queue-dispatcher] Dispatched ${dispatched}/${collectedItems.length} items for org ${orgId} (session: ${sessionId})`);
+  console.warn(
+    `[queue-dispatcher] Dispatched ${dispatched}/${collectedItems.length} items for org ${orgId} (session: ${sessionId})`
+  );
   return dispatched;
 }
