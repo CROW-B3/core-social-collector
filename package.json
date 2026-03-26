@@ -1,30 +1,22 @@
 {
   "name": "crow-social-collector",
-  "description": "CROW Social Media Collector - Cloudflare Worker for collecting social media mentions via cron triggers",
+  "description": "Cloudflare Worker that collects social media posts from platform APIs and stores raw data in R2",
   "type": "module",
   "scripts": {
-    "dev": "wrangler dev --port 8016",
-    "deploy": "wrangler deploy --minify",
+    "dev": "wrangler dev --port 8018",
+    "deploy": "wrangler deploy --minify --env production",
     "deploy:dev": "wrangler deploy --minify --env dev",
     "cf-typegen": "wrangler types --env-interface CloudflareBindings",
-    "db:studio": "drizzle-kit studio",
-    "db:studio:remote": "REMOTE=1 drizzle-kit studio",
-    "db:generate": "drizzle-kit generate",
-    "db:migrate:dev": "wrangler d1 migrations apply DB --env dev --remote",
-    "db:migrate:prod": "wrangler d1 migrations apply DB --remote",
     "prepare": "husky",
     "lint": "eslint src/",
     "lint:fix": "eslint src/ --fix",
     "format": "bun run prettier src/ --write",
-    "bun:dev": "bun run --watch src/index.ts",
-    "bun:start": "bun run src/index.ts",
-    "bun:build": "bun build src/index.ts --compile --outfile server",
-    "test": "vitest run",
-    "test:watch": "vitest"
+    "db:migrate:local": "wrangler d1 migrations apply DB",
+    "db:migrate:dev": "wrangler d1 migrations apply DB --env dev --remote",
+    "db:migrate:prod": "wrangler d1 migrations apply DB --env production --remote"
   },
   "dependencies": {
     "@antfu/eslint-config": "^6.7.1",
-    "@cloudflare/workers-types": "^4.20240124.0",
     "@hono/swagger-ui": "^0.5.2",
     "@hono/zod-openapi": "^1.1.5",
     "drizzle-orm": "^0.45.1",
@@ -33,13 +25,12 @@
     "zod": "^4.2.1"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^4.20240124.0",
     "@commitlint/config-conventional": "^20.2.0",
-    "@deox/drizzle-d1-utils": "^0.0.1",
     "drizzle-kit": "^0.31.8",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
     "prettier": "^3.7.4",
-    "vitest": "^4.1.0",
     "wrangler": "^4.55.0"
   },
   "lint-staged": {

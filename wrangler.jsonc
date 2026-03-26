@@ -1,106 +1,122 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "crow-social-collector",
-  "account_id": "8f0203259905d8923687286c84921e6c",
   "main": "src/index.ts",
   "compatibility_date": "2025-12-17",
-  "compatibility_flags": ["nodejs_compat"],
-  "dev": {
-    "port": 8016,
-  },
   "observability": {
     "enabled": true,
     "head_sampling_rate": 1,
   },
-  "ai": {
-    "binding": "AI",
-  },
+  // Default vars (local dev — points to social-ingest-service on localhost)
   "vars": {
-    "ENVIRONMENT": "prod",
-    "AI_GATEWAY_ID": "crow-ai-gateway",
-    // TAVILY_API_KEY must be set as a secret: wrangler secret put TAVILY_API_KEY
+    "ENVIRONMENT": "local",
+    "INSTAGRAM_API_BASE_URL": "http://localhost:8017/instagram/v21.0",
+    "TWITTER_API_BASE_URL": "http://localhost:8017/twitter/2",
+    "REDDIT_API_BASE_URL": "http://localhost:8017/reddit",
+    "INSTAGRAM_API_KEY": "mock-key",
+    "TWITTER_API_KEY": "mock-key",
+    "REDDIT_API_KEY": "mock-key",
+    "PROCESSOR_SERVICE_URL": "http://localhost:8019",
   },
   "d1_databases": [
     {
       "binding": "DB",
-      "database_name": "crow-social-collector-db",
-      // TODO: Replace with actual database_id after running: wrangler d1 create crow-social-collector-db
-      "database_id": "PLACEHOLDER_PROD_DB_ID",
-      "migrations_dir": "drizzle/migrations",
+      "database_name": "crow-social-collector-db-local",
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "migrations",
+    },
+  ],
+  "r2_buckets": [
+    {
+      "binding": "RAW_DATA_BUCKET",
+      "bucket_name": "crow-social-raw-local",
     },
   ],
   "queues": {
     "producers": [
       {
-        "binding": "SOCIAL_PROCESSING_QUEUE",
-        "queue": "crow-social-processing-queue",
+        "binding": "PROCESSOR_QUEUE",
+        "queue": "crow-social-processing-queue-local",
       },
     ],
   },
-  "triggers": {
-    "crons": ["0 */2 * * *"],
+  "dev": {
+    "port": 8018,
   },
-  "routes": [
-    { "pattern": "social-collector.crowai.dev", "custom_domain": true },
-  ],
   "env": {
     "dev": {
-      "ai": {
-        "binding": "AI",
-      },
       "vars": {
         "ENVIRONMENT": "dev",
-        "AI_GATEWAY_ID": "crow-ai-gateway",
-        // TAVILY_API_KEY must be set as a secret: wrangler secret put TAVILY_API_KEY --env dev
-        // SYSTEM_SECRET must be set as a secret: wrangler secret put SYSTEM_SECRET --env dev
+        "INSTAGRAM_API_BASE_URL": "https://dev.internal.social-ingest.crowai.dev/instagram/v21.0",
+        "TWITTER_API_BASE_URL": "https://dev.internal.social-ingest.crowai.dev/twitter/2",
+        "REDDIT_API_BASE_URL": "https://dev.internal.social-ingest.crowai.dev/reddit",
+        "INSTAGRAM_API_KEY": "mock-key",
+        "TWITTER_API_KEY": "mock-key",
+        "REDDIT_API_KEY": "mock-key",
+        "PROCESSOR_SERVICE_URL": "",
       },
       "d1_databases": [
         {
           "binding": "DB",
           "database_name": "crow-social-collector-db-dev",
-          "database_id": "9e409755-1ef9-4773-8eb4-524f0ecc6aea",
-          "migrations_dir": "drizzle/migrations",
+          "database_id": "00000000-0000-0000-0000-000000000001",
+          "migrations_dir": "migrations",
           "remote": true,
+        },
+      ],
+      "r2_buckets": [
+        {
+          "binding": "RAW_DATA_BUCKET",
+          "bucket_name": "crow-social-raw-dev",
         },
       ],
       "queues": {
         "producers": [
           {
-            "binding": "SOCIAL_PROCESSING_QUEUE",
+            "binding": "PROCESSOR_QUEUE",
             "queue": "crow-social-processing-queue-dev",
           },
         ],
       },
-      "triggers": {
-        "crons": ["0 */2 * * *"],
-      },
       "routes": [
-        { "pattern": "dev.social-collector.crowai.dev", "custom_domain": true },
         { "pattern": "dev.internal.social-collector.crowai.dev", "custom_domain": true },
       ],
     },
-    "local": {
+    "production": {
       "vars": {
-        "ENVIRONMENT": "local",
-        "AI_GATEWAY_ID": "crow-ai-gateway",
+        "ENVIRONMENT": "production",
+        // Production: real API base URLs
+        "INSTAGRAM_API_BASE_URL": "https://graph.instagram.com/v21.0",
+        "TWITTER_API_BASE_URL": "https://api.twitter.com/2",
+        "REDDIT_API_BASE_URL": "https://oauth.reddit.com",
+        "PROCESSOR_SERVICE_URL": "",
       },
       "d1_databases": [
         {
           "binding": "DB",
-          "database_name": "crow-social-collector-db-local",
-          // TODO: Replace with actual database_id after running: wrangler d1 create crow-social-collector-db-local
-          "database_id": "PLACEHOLDER_LOCAL_DB_ID",
-          "migrations_dir": "drizzle/migrations",
+          "database_name": "crow-social-collector-db",
+          "database_id": "00000000-0000-0000-0000-000000000002",
+          "migrations_dir": "migrations",
+          "remote": true,
+        },
+      ],
+      "r2_buckets": [
+        {
+          "binding": "RAW_DATA_BUCKET",
+          "bucket_name": "crow-social-raw",
         },
       ],
       "queues": {
         "producers": [
           {
-            "binding": "SOCIAL_PROCESSING_QUEUE",
-            "queue": "crow-social-processing-queue-local",
+            "binding": "PROCESSOR_QUEUE",
+            "queue": "crow-social-processing-queue",
           },
         ],
       },
+      "routes": [
+        { "pattern": "internal.social-collector.crowai.dev", "custom_domain": true },
+      ],
     },
   },
 }

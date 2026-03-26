@@ -1,15 +1,13 @@
-import process from 'node:process';
-import { drizzleD1Config } from '@deox/drizzle-d1-utils';
+import type { Config } from 'drizzle-kit';
 
-export default drizzleD1Config(
-  {
-    out: './drizzle/migrations',
-    schema: './src/db/schema.ts',
+export default {
+  schema: './src/db/schema.ts',
+  out: './migrations',
+  dialect: 'sqlite',
+  driver: 'd1-http',
+  dbCredentials: {
+    accountId: process.env.CLOUDFLARE_ACCOUNT_ID!,
+    databaseId: process.env.CLOUDFLARE_DATABASE_ID!,
+    token: process.env.CLOUDFLARE_API_TOKEN!,
   },
-  {
-    accountId: process.env.CLOUDFLARE_D1_ACCOUNT_ID,
-    apiToken: process.env.CLOUDFLARE_D1_API_TOKEN,
-    binding: 'DB',
-    remote: process.env.REMOTE === 'true' || process.env.REMOTE === '1',
-  }
-);
+} satisfies Config;
