@@ -8,6 +8,7 @@
     "lib": ["ESNext"],
     "jsx": "react-jsx",
     "jsxImportSource": "hono/jsx",
-    "types": ["@cloudflare/workers-types", "node"]
-  }
+    "types": ["./worker-configuration.d.ts"]
+  },
+  "exclude": ["drizzle.config.ts"]
 }

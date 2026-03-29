@@ -30,7 +30,7 @@ export async function writeToR2(
       capturedAt: envelope.meta.capturedAt,
     },
   });
-  console.log(`✅ Wrote to R2: ${key}`);
+  console.warn(`✅ Wrote to R2: ${key}`);
 }
 
 /**
@@ -53,7 +53,7 @@ export async function readFromR2(
  */
 export async function deleteFromR2(bucket: R2Bucket, key: string): Promise<void> {
   await bucket.delete(key);
-  console.log(`🗑️ Deleted from R2: ${key}`);
+  console.warn(`🗑️ Deleted from R2: ${key}`);
 }
 
 /**
@@ -62,5 +62,5 @@ export async function deleteFromR2(bucket: R2Bucket, key: string): Promise<void>
 export async function batchDeleteFromR2(bucket: R2Bucket, keys: string[]): Promise<void> {
   if (keys.length === 0) return;
   await bucket.delete(keys);
-  console.log(`🗑️ Deleted ${keys.length} objects from R2`);
+  console.warn(`🗑️ Deleted ${keys.length} objects from R2`);
 }

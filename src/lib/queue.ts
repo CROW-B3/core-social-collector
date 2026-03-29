@@ -19,5 +19,5 @@ export async function batchSendToProcessorQueue(
 ): Promise<void> {
   if (messages.length === 0) return;
   await queue.sendBatch(messages.map(msg => ({ body: msg })));
-  console.log(`📤 Sent ${messages.length} messages to processor queue`);
+  console.warn(`📤 Sent ${messages.length} messages to processor queue`);
 }

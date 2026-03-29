@@ -1,26 +1,25 @@
 import type {
   Environment,
-  SupportedPlatform,
   PlatformAdapter,
-  PlatformPost,
-  R2Envelope,
   ProcessorQueueMessage,
+  R2Envelope,
+  SupportedPlatform,
 } from './types';
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
+import { InstagramAdapter } from './adapters/instagram';
+import { RedditAdapter } from './adapters/reddit';
+import { TwitterAdapter } from './adapters/twitter';
+import { sendToProcessorQueue } from './lib/queue';
+import { generateR2Key, readFromR2, writeToR2 } from './lib/r2';
 import {
-  HealthRoute,
   CollectAllRoute,
   CollectPlatformRoute,
+  HealthRoute,
   InspectR2Route,
   R2ContentRoute,
 } from './routes';
-import { InstagramAdapter } from './adapters/instagram';
-import { TwitterAdapter } from './adapters/twitter';
-import { RedditAdapter } from './adapters/reddit';
-import { generateR2Key, writeToR2, readFromR2 } from './lib/r2';
-import { sendToProcessorQueue } from './lib/queue';
 
 const app = new OpenAPIHono<{ Bindings: Environment }>();
 
@@ -46,7 +45,7 @@ app.openapi(HealthRoute, c => {
 
 app.openapi(CollectAllRoute, async c => {
   const { limit: limitStr, orgId } = c.req.valid('query');
-  const limit = parseInt(limitStr, 10) || 10;
+  const limit = Number.parseInt(limitStr, 10) || 10;
 
   const platforms: SupportedPlatform[] = ['instagram', 'twitter', 'reddit'];
   const results = await Promise.allSettled(
@@ -72,7 +71,7 @@ app.openapi(CollectAllRoute, async c => {
   return c.json({
     results: collected,
     totalPosts: collected.reduce((sum, r) => sum + r.postsCollected, 0),
-  });
+  }, 200 as const);
 });
 
 // ========================================
@@ -82,7 +81,7 @@ app.openapi(CollectAllRoute, async c => {
 app.openapi(CollectPlatformRoute, async c => {
   const { platform } = c.req.valid('param');
   const { limit: limitStr, orgId, accountId } = c.req.valid('query');
-  const limit = parseInt(limitStr, 10) || 10;
+  const limit = Number.parseInt(limitStr, 10) || 10;
 
   try {
     const result = await collectFromPlatform(
@@ -92,10 +91,10 @@ app.openapi(CollectPlatformRoute, async c => {
       limit,
       accountId
     );
-    return c.json(result);
+    return c.json(result, 200 as const);
   } catch (error) {
     console.error(`Collection error for ${platform}:`, error);
-    return c.json({ error: String(error) }, 500);
+    return c.json({ error: String(error) }, 500 as const);
   }
 });
 
@@ -105,7 +104,7 @@ app.openapi(CollectPlatformRoute, async c => {
 
 app.openapi(InspectR2Route, async c => {
   const { limit: limitStr, prefix } = c.req.valid('query');
-  const limit = parseInt(limitStr, 10) || 50;
+  const limit = Number.parseInt(limitStr, 10) || 50;
 
   const listed = await c.env.RAW_DATA_BUCKET.list({
     limit,
@@ -119,7 +118,7 @@ app.openapi(InspectR2Route, async c => {
       uploaded: obj.uploaded.toISOString(),
     })),
     truncated: listed.truncated,
-  });
+  }, 200 as const);
 });
 
 // ========================================
@@ -131,10 +130,10 @@ app.openapi(R2ContentRoute, async c => {
 
   const envelope = await readFromR2(c.env.RAW_DATA_BUCKET, key);
   if (!envelope) {
-    return c.json({ error: `Object not found: ${key}` }, 404);
+    return c.json({ error: `Object not found: ${key}` }, 404 as const);
   }
 
-  return c.json(envelope as any);
+  return c.json(envelope as any, 200 as const);
 });
 
 // ========================================
@@ -203,7 +202,7 @@ async function collectFromPlatform(
   queueSent: boolean;
   processorNotified: boolean;
 }> {
-  console.log(
+  console.warn(
     `Collecting from ${platform} for org=${orgId} limit=${limit}`
   );
 
@@ -256,7 +255,7 @@ async function collectFromPlatform(
     };
     await sendToProcessorQueue(env.PROCESSOR_QUEUE, queueMessage);
     queueSent = true;
-    console.log(`Queue message sent for batch ${batchId}`);
+    console.warn(`Queue message sent for batch ${batchId}`);
   } catch (error) {
     console.warn(`Queue send failed (expected in local dev): ${error}`);
   }
@@ -283,14 +282,14 @@ async function collectFromPlatform(
         const text = await response.text();
         console.warn(`Processor HTTP forward failed: ${response.status} ${text}`);
       } else {
-        console.log(`Processor notified via HTTP for batch ${batchId}`);
+        console.warn(`Processor notified via HTTP for batch ${batchId}`);
       }
     } catch (error) {
       console.warn(`Processor HTTP forward error: ${error}`);
     }
   }
 
-  console.log(
+  console.warn(
     `Collected ${posts.length} posts from ${platform} — R2: ${r2Key}, queue: ${queueSent}, http: ${processorNotified}`
   );
 

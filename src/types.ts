@@ -60,11 +60,11 @@ export interface PlatformPost {
 // ========================================
 
 export interface PlatformAdapter {
-  fetchPosts(config: {
+  fetchPosts: (config: {
     accountId: string;
     cursor?: string;
     limit: number;
-  }): Promise<{ posts: PlatformPost[]; nextCursor?: string }>;
+  }) => Promise<{ posts: PlatformPost[]; nextCursor?: string }>;
 }
 
 // ========================================

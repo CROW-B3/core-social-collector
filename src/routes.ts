@@ -1,10 +1,10 @@
 import { createRoute, z } from '@hono/zod-openapi';
 import {
-  HealthSchema,
   CollectAllResultSchema,
   CollectResultSchema,
-  R2ListSchema,
   ErrorSchema,
+  HealthSchema,
+  R2ListSchema,
 } from './types';
 
 export const HealthRoute = createRoute({
